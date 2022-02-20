@@ -1,0 +1,22 @@
+GET http://localhost:4000/api
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiQm9iIiwiaWF0IjoxNjQ1MzI4NjM4LCJleHAiOjE2NDUzMjg2NTN9.CExDx8x93v5oUb1D7SWKRIXw9zm_jH-y7VXr95NTU8c
+################################
+
+POST http://localhost:5000/api/auth/login
+Content-Type: application/json
+
+{
+  "name": "Bob"
+}
+
+########
+POST http://localhost:5000/api/auth/token
+Content-Type: application/json
+
+{
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiQm9iIiwiaWF0IjoxNjQ1MzI4ODk2LCJleHAiOjE2NDUzMzI0OTZ9.Kaw16v3Th1_ytlBFE3ZX6-UwLXg5rsRZfW5za2cKLT8"
+}
+
+########
+DELETE http://localhost:5000/api/auth/logout
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiQm9iIiwiaWF0IjoxNjQ1MzI4ODk2LCJleHAiOjE2NDUzMzI0OTZ9.Kaw16v3Th1_ytlBFE3ZX6-UwLXg5rsRZfW5za2cKLT8
