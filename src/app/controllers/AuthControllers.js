@@ -1,6 +1,8 @@
 const jwt = require('jsonwebtoken');
 const Account = require('../models/account');
-const { mongooseToObject,mulMgToObject } = require('../../utils/mongoose');
+const { mongooseToObject, mulMgToObject } = require('../../utils/mongoose');
+const bcrypt = require('bcrypt');
+ 
 let users = [
     { name: 'John', age: 20 },
     { name: 'Bob', age: 30 },
@@ -30,15 +32,19 @@ const updateRefreshToken = (name, refreshToken) => {
     })
 }
 class AuthControllers {
-    SignUp(req, res) {
+    async SignUp(req, res) {
+        const saltRounds = 10;
         var firstName = req.body.firstName;
         var lastName = req.body.lastName;
         var password = req.body.password;
+        var passwordHash = bcrypt.hashSync(password, saltRounds);
+        password = await passwordHash;
         var email = req.body.email;
         var phoneNumber = req.body.phoneNumber;
         var dateOfBirth = req.body.dateOfBirth;
-        console.log(dateOfBirth);
-        var formData = {firstName, lastName, password, email, phoneNumber, dateOfBirth};
+        var dateFormatted = new Date(dateOfBirth).toLocaleDateString('pt-PT')
+        console.log(dateFormatted, passwordHash);
+        var formData = { firstName, lastName, password, email, phoneNumber, dateOfBirth: dateFormatted };
         const account = new Account(formData);
         account.save((err, account) => {
             if (err) {
