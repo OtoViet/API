@@ -15,7 +15,7 @@ app.use(cors({ origin: "http://localhost:3000", optionsSuccessStatus: 200 }));
 app.use(express.json());
 
 
-app.listen(5000, () => {
+app.listen(process.env.PORT, () => {
     console.log('server is running on port 5000');
 });
 route(app);
