@@ -14,5 +14,4 @@ app.options("*", cors({ origin: 'http://localhost:3000', optionsSuccessStatus: 2
 app.use(cors({ origin: "http://localhost:3000", optionsSuccessStatus: 200 }));
 app.use(express.json());
 
-
 route(app);
