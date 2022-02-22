@@ -12,11 +12,12 @@ let users = [
 ];
 
 const generateToken = (user) => {
-    const { name } = user;
+    // console.log(user);
+    const { email } = user;
     //create token
-    const accessToken = jwt.sign({ name }, process.env.JWT_ACCESS_TOKEN,
+    const accessToken = jwt.sign({ email }, process.env.JWT_ACCESS_TOKEN,
         { expiresIn: '15s' });
-    const refreshToken = jwt.sign({ name }, process.env.JWT_REFRESH_TOKEN,
+    const refreshToken = jwt.sign({ email }, process.env.JWT_REFRESH_TOKEN,
         { expiresIn: '1h' });
     return { accessToken, refreshToken };
 };
@@ -55,15 +56,37 @@ class AuthControllers {
         });
         console.log(req.body);
     }
-    Login(req, res) {
-        const { name } = req.body;
-        const user = users.find(u => u.name === name);
-        if (!user) {
-            res.status(400).json({ error: 'user not found' });
+    async CheckExistAccount(req, res) {
+        try{
+            var existAccount = await Account.findOne({ email: req.body.email });
+            if(existAccount){
+                return res.status(200).json({exist: "Email đã tồn tại"});
+            }
+            return res.status(200).json({err: null});
         }
-        const token = generateToken(user);
-        updateRefreshToken(name, token.refreshToken);
-        res.json(token);
+        catch(err){
+            console.log(err);
+        }
+    }
+    async Login(req, res) {
+        try{
+            const { email, password } = req.body;
+            const user = await Account.findOne({ email });
+            let isMatch = null;
+            if(user) {
+                const truePassword = user.password;
+                isMatch = await bcrypt.compare(password, truePassword);
+            }
+            if (!isMatch) {
+                return res.status(400).json({ error: 'user not found' });
+            }
+            const token = generateToken(user);
+            updateRefreshToken(email, token.refreshToken);
+            return res.status(200).json(token);
+        }
+        catch(err){
+            console.log(err);
+        }
     }
     Token(req, res) {
         const { refreshToken } = req.body;
