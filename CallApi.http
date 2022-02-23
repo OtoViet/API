@@ -19,4 +19,4 @@ Content-Type: application/json
 
 ########
 DELETE http://localhost:5000/api/auth/logout
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiQm9iIiwiaWF0IjoxNjQ1MzI4ODk2LCJleHAiOjE2NDUzMzI0OTZ9.Kaw16v3Th1_ytlBFE3ZX6-UwLXg5rsRZfW5za2cKLT8
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRhbkBnbWFpbC5jb20iLCJpYXQiOjE2NDU2MTE1NzUsImV4cCI6MTY0NTYxNTE3NX0.0ZmdQ04dlR0Mv4EupuJWOrU1k8hYU3lE6CLWyhSGcas

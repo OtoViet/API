@@ -78,7 +78,7 @@ class AuthControllers {
                 isMatch = await bcrypt.compare(password, truePassword);
             }
             if (!isMatch) {
-                return res.status(400).json({ error: 'user not found' });
+                return res.status(401).json({ error: 'user or password error' });
             }
             const token = generateToken(user);
             updateRefreshToken(email, token.refreshToken);
@@ -106,11 +106,11 @@ class AuthControllers {
             res.json(token);
         });
     }
-    Logout(req, res) {
-        const user = users.find(el => el.name == req.user.name);
+    async Logout(req, res) {
+        const user = await Account.findOne({ email: req.user.email });
         console.log(user);
-        updateRefreshToken(user.name, null);
-        res.sendStatus(204);
+        updateRefreshToken(user.email, null);
+        return res.sendStatus(204);
     }
 }
 
