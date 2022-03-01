@@ -6,11 +6,13 @@ const verifyResetPassword = require('../app/middleware/verifyResetPassword');
 router.get('/test',(req, res) => {res.json({"test": "ahihi"})});
 router.post('/signUp',AuthControllers.SignUp);
 router.post('/checkExistAccount',AuthControllers.CheckExistAccount);
+router.post('/checkPassword',verifyToken,AuthControllers.CheckPassword);
 router.post('/login',AuthControllers.Login);
 router.post('/loginGoogle',AuthControllers.LoginGoogle);
 router.post('/token',AuthControllers.Token);
 router.delete('/logout',verifyToken,AuthControllers.Logout);
 router.post('/checkTokenResetPassword',AuthControllers.CheckTokenResetPassword);
 router.patch('/forgotPassword',AuthControllers.ForgotPassword);
-router.post('/resetPassword',verifyResetPassword,AuthControllers.ResetPassword)
+router.post('/resetPassword',verifyResetPassword,AuthControllers.ResetPassword);
+router.patch('/changePassword',verifyToken,AuthControllers.ChangePassword);
 module.exports = router;

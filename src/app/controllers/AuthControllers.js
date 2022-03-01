@@ -7,7 +7,6 @@ const { mongooseToObject, mulMgToObject } = require('../../utils/mongoose');
 const bcrypt = require('bcrypt');
 require('dotenv').config();
 const generateToken = (user) => {
-    // console.log(user);
     const email = user;
     //create token
     const accessToken = jwt.sign({ email }, process.env.JWT_ACCESS_TOKEN,
@@ -59,6 +58,25 @@ class AuthControllers {
                 return res.status(200).json({ exist: "Email đã tồn tại" });
             }
             return res.status(200).json({ err: null });
+        }
+        catch (err) {
+            console.log(err);
+        }
+    }
+    async CheckPassword(req, res) {
+        try {
+            const { password } = req.body;
+            const user = await Account.findOne({ email: req.user.email });
+            bcrypt.compare(password, user.password, (err, result) => {
+                if (err) {
+                    console.log(err);
+                    return res.status(500).json({ result: false });
+                }
+                if (result) {
+                    return res.status(200).json({ result: true });
+                }
+                return res.status(403).json({ result: false });
+            });
         }
         catch (err) {
             console.log(err);
@@ -218,6 +236,33 @@ class AuthControllers {
             console.log('co loi xay ra khi update password')
             return res.status(500).json({ error: 'Password not changed' });
         }
+    }
+    ChangePassword(req, res) {
+        const { email } = req.user;
+        const { currentPassword, password } = req.body;
+        Account.findOne({ email }, async (err, account) => {
+            if (err) {
+                console.log(err);
+                return res.status(500).json({ error: 'Error when change password' });
+            }
+            if (!account) {
+                return res.status(404).json({ error: 'User not found' });
+            }
+            const validPassword = await bcrypt.compare(currentPassword, account.password);
+            if (!validPassword) {
+                return res.status(401).json({ error: 'Wrong password' });
+            }
+            const hashedPassword = await bcrypt.hash(password, 10);
+            let userUpdate = await Account.findOneAndUpdate({ email }, { password: hashedPassword });
+            if (userUpdate) {
+                console.log('update password thanh cong');
+                return res.status(200).json({ message: 'Password changed' });
+            }
+            else {
+                console.log('co loi xay ra khi update password')
+                return res.status(500).json({ error: 'Password not changed' });
+            }
+        });
     }
 }
 
