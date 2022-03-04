@@ -9,6 +9,7 @@ const accountSchema = new Schema({
     email: { type: String, required: true,unique: true},
     phoneNumber: { type: String, /*required: true*/ },
     dateOfBirth: { type: String, /*required: true*/default:"01/01/2000" },
+    address: {type: String},
     isVerified: {
         type: Boolean,
         default: false,

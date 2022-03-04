@@ -1,7 +1,6 @@
 const jwt = require('jsonwebtoken');
 const {OAuth2Client} = require('google-auth-library');
 require('dotenv').config();
-const Account = require('../models/account');
 
 const verifyToken = (req, res, next) => {
     const authHeader = req.header('Authorization');
