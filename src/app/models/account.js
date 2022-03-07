@@ -5,6 +5,7 @@ const slug = require('mongoose-slug-generator');
 const accountSchema = new Schema({
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
+    fullName: { type: String, required: true},
     password: { type: String, /*required: true*/ },
     email: { type: String, required: true,unique: true},
     phoneNumber: { type: String, /*required: true*/ },
@@ -14,6 +15,7 @@ const accountSchema = new Schema({
         type: Boolean,
         default: false,
     },
+    image: { type: String },
     typeAccount: { type: String, default: "default"},
     roles: { type: String, default: "customer"},
     refreshToken: { type: String, default: "" },

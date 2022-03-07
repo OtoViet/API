@@ -32,6 +32,7 @@ class AuthControllers {
         const saltRounds = 10;
         var firstName = req.body.firstName;
         var lastName = req.body.lastName;
+        var fullName= firstName + ' ' + lastName;
         var password = req.body.password;
         var passwordHash = bcrypt.hashSync(password, saltRounds);
         password = await passwordHash;
@@ -40,7 +41,7 @@ class AuthControllers {
         var dateOfBirth = req.body.dateOfBirth;
         var dateFormatted = new Date(dateOfBirth).toLocaleDateString('pt-PT')
         console.log(dateFormatted, passwordHash);
-        var formData = { firstName, lastName, password, email, phoneNumber, dateOfBirth: dateFormatted };
+        var formData = { firstName, lastName, fullName, password, email, phoneNumber, dateOfBirth: dateFormatted };
         const account = new Account(formData);
         account.save((err, account) => {
             if (err) {

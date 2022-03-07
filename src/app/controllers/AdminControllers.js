@@ -5,13 +5,14 @@ const Mailgun = require('mailgun.js');
 const mailgun = new Mailgun(formData);
 const { mongooseToObject, mulMgToObject } = require('../../utils/mongoose');
 const bcrypt = require('bcrypt');
+
 require('dotenv').config();
 
 const generateToken = (user) => {
     const email = user;
     //create token
     const accessToken = jwt.sign({ email }, process.env.JWT_ACCESS_TOKEN,
-        { expiresIn: '30s' });
+        { expiresIn: '30m' });
     const refreshToken = jwt.sign({ email }, process.env.JWT_REFRESH_TOKEN,
         { expiresIn: '1h' });
     return { accessToken, refreshToken };
@@ -31,29 +32,38 @@ const updateRefreshToken = (name, refreshToken) => {
 
 class AdminControllers {
     async CreateEmployeeAccount(req, res) {
-        const saltRounds = 10;
-        var role = 'employee';
-        var firstName = req.body.firstName;
-        var lastName = req.body.lastName;
-        var password = req.body.password;
-        var passwordHash = bcrypt.hashSync(password, saltRounds);
-        password = await passwordHash;
-        var email = req.body.email;
-        var address = req.body.address;
-        var phoneNumber = req.body.phoneNumber;
-        var dateOfBirth = req.body.dateOfBirth;
-        var dateFormatted = new Date(dateOfBirth).toLocaleDateString('pt-PT')
-        console.log(dateFormatted, passwordHash);
-        var formData = { firstName, lastName, password, address,  email, phoneNumber, dateOfBirth: dateFormatted, roles: role };
-        const account = new Account(formData);
-        account.save((err, account) => {
-            if (err) {
-                console.log(err);
-                res.status(500).send(err);
-            }
-            res.status(201).json(mongooseToObject(account));
-        });
-        console.log("Tao tai khoan nhan vien moi thanh cong");
+        try{
+            var image = req.body.image;
+            console.log(image);
+            const saltRounds = 10;
+            var role = 'employee';
+            var firstName = req.body.firstName;
+            var lastName = req.body.lastName;
+            var fullName= firstName + ' ' + lastName;
+            var password = req.body.password;
+            var passwordHash = bcrypt.hashSync(password, saltRounds);
+            password = await passwordHash;
+            var email = req.body.email;
+            var address = req.body.address;
+            var phoneNumber = req.body.phoneNumber;
+            var dateOfBirth = req.body.dateOfBirth;
+            var dateFormatted = new Date(dateOfBirth).toLocaleDateString('pt-PT')
+            console.log(dateFormatted, passwordHash);
+            var formData = { firstName, lastName, fullName, image, password, address,  email, phoneNumber, dateOfBirth: dateFormatted, roles: role };
+            const account = new Account(formData);
+            account.save((err, account) => {
+                if (err) {
+                    console.log(err);
+                    res.status(500).send(err);
+                }
+                res.status(201).json(mongooseToObject(account));
+            });
+            console.log("Tao tai khoan nhan vien moi thanh cong");
+        }
+        catch(err){
+            console.log(err);
+            res.status(500).json({ error: 'Create employee account error' });
+        }
     }
     async login(req, res){
         try {
@@ -92,6 +102,63 @@ class AdminControllers {
         catch(err){
             console.log(err);
             res.status(500).json({ error: 'Get all employee error' });
+        }
+    }
+    GetEmployee(req, res){
+        try{
+            const id = req.params.id;
+            Account.findById(id, (err, account) => {
+                if (err) {
+                    console.log(err);
+                    res.status(500).json({ error: 'Get employee by id error' });
+                }
+                console.log('lay thong tin nhan vien thanh cong');
+                res.status(200).json(mongooseToObject(account));
+            });
+        }
+        catch(err){
+            console.log(err);
+            res.status(500).json({ error: 'Get employee by id error' });
+        }
+    }
+    DeleteEmployee(req, res){
+        try{
+            const id = req.params.id;
+            Account.findByIdAndDelete(id, (err, account) => {
+                if (err) {
+                    console.log(err);
+                    res.status(500).json({ error: 'Delete employee error' });
+                }
+                console.log('xoa tai khoan thanh cong');
+                res.status(200).json(mongooseToObject(account));
+            });
+        }
+        catch(err){
+            console.log(err);
+            res.status(500).json({ error: 'Delete employee error' });
+        }
+    }
+    UpdateInfoEmployee(req, res){
+        try{
+            const id = req.params.id;
+            const formData = req.body;
+            let fullName = req.body.firstName + ' ' + req.body.lastName;
+            var dateOfBirth = req.body.dateOfBirth;
+            var dateFormatted = new Date(dateOfBirth).toLocaleDateString('pt-PT');
+            formData.dateOfBirth = dateFormatted;
+            formData.fullName = fullName;
+            Account.findByIdAndUpdate(id, formData, {new: true}, (err, account) => {
+                if (err) {
+                    console.log(err);
+                    res.status(500).json({ error: 'Update info employee error' });
+                }
+                console.log('cap nhat thong tin thanh cong');
+                res.status(200).json(mongooseToObject(account));
+            });
+        }
+        catch(err){
+            console.log(err);
+            res.status(500).json({ error: 'Update info employee error' });
         }
     }
 }
