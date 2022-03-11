@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-const ObjectId = Schema.ObjectId;
 const slug = require('mongoose-slug-generator');
 const accountSchema = new Schema({
     firstName: { type: String, required: true },

@@ -10,7 +10,7 @@ const generateToken = (user) => {
     const email = user;
     //create token
     const accessToken = jwt.sign({ email }, process.env.JWT_ACCESS_TOKEN,
-        { expiresIn: '30s' });
+        { expiresIn: '30m' });
     const refreshToken = jwt.sign({ email }, process.env.JWT_REFRESH_TOKEN,
         { expiresIn: '1h' });
     return { accessToken, refreshToken };
@@ -159,10 +159,15 @@ class AuthControllers {
         }
     }
     async Logout(req, res) {
-        console.log('van qua duoc');
-        const user = await Account.findOne({ email: req.user.email });
-        updateRefreshToken(user.email, null);
-        return res.sendStatus(204);
+        try{
+            const user = await Account.findOne({ email: req.user.email });
+            updateRefreshToken(user.email, null);
+            return res.sendStatus(204);
+        }
+        catch (err) {
+            console.log('co loi xay ra khi logout');
+            return res.sendStatus(500);
+        }
     }
     ForgotPassword(req, res) {
         const { email } = req.body;

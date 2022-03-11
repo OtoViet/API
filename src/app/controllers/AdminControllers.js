@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const Account = require('../models/account');
+const Products = require('../models/products');
 const formData = require('form-data');
 const Mailgun = require('mailgun.js');
 const mailgun = new Mailgun(formData);
@@ -29,7 +30,7 @@ const updateRefreshToken = (name, refreshToken) => {
         });
 
 }
-
+//employees
 class AdminControllers {
     async CreateEmployeeAccount(req, res) {
         try{
@@ -159,6 +160,73 @@ class AdminControllers {
         catch(err){
             console.log(err);
             res.status(500).json({ error: 'Update info employee error' });
+        }
+    }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//products
+
+    AddNewProduct(req, res){
+        try{
+            const formData = req.body;
+            const product = new Products(formData);
+            product.save((err, product) => {
+                if (err) {
+                    console.log(err);
+                    res.status(500).json({ error: 'Add new product error' });
+                }
+                console.log('them san pham thanh cong');
+                res.status(201).json(mongooseToObject(product));
+            });
+        }
+        catch(err){
+            console.log(err);
+            res.status(500).json({ error: 'Add new product error' });
+        }
+    }
+    async GetAllProduct(req, res){
+        try{
+            const products = await Products.find({});
+            if(products) res.status(200).json(mulMgToObject(products));
+        }
+        catch(err){
+            console.log(err);
+            res.status(500).json({ error: 'Get all product error' });
+        }
+    }
+    UpdateProduct(req, res){
+        try{
+            const id = req.params.id;
+            const formData = req.body;
+            Products.findByIdAndUpdate(id, formData, {new: true}, (err, product) => {
+                if (err) {
+                    console.log(err);
+                    res.status(500).json({ error: 'Update product error' });
+                }
+                console.log('cap nhat san pham thanh cong');
+                res.status(200).json(mongooseToObject(product));
+            });
+        }
+        catch(err){
+            console.log(err);
+            res.status(500).json({ error: 'Update product error' });
+        }
+    }
+    DeleteProduct(req, res){
+        try{
+            const id = req.params.id;
+            Products.findByIdAndDelete(id, (err, product) => {
+                if (err) {
+                    console.log(err);
+                    res.status(500).json({ error: 'Delete product error' });
+                }
+                console.log('xoa san pham thanh cong');
+                res.status(200).json(mongooseToObject(product));
+            });
+        }
+        catch(err){
+            console.log(err);
+            res.status(500).json({ error: 'Delete product error' });
         }
     }
 }
