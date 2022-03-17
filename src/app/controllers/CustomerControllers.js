@@ -20,6 +20,18 @@ class CustomerControllers {
             res.status(500).json({ error: 'Get all product error' });
         }
     }
+    GetProductById(req, res){
+        Products.findById(req.params.id, (err, product) => {
+            if(err) res.status(404).json({ error: 'Not found product by id' });
+            res.status(200).json(mongooseToObject(product));
+        });
+    }
+    GetInfoCustomer(req, res){
+        Account.findOne(req.body.email, (err, account) => {
+            if(err) res.status(500).json({ error: 'Get info customer error' });
+            res.status(200).json(mongooseToObject(account));
+        });
+    }
    
 }
 
