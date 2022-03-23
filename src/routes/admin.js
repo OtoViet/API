@@ -17,4 +17,9 @@ router.post('/addNewProduct', verifyToken, checkAdmin, AdminControllers.AddNewPr
 router.get('/getAllProduct', verifyToken, checkAdmin, AdminControllers.GetAllProduct);
 router.patch('/updateProduct/:id', verifyToken, checkAdmin, AdminControllers.UpdateProduct);
 router.delete('/deleteProduct/:id', verifyToken, checkAdmin, AdminControllers.DeleteProduct);
+//stores
+router.post('/createStore', verifyToken, checkAdmin, AdminControllers.CreateStore);
+router.get('/getAllStore', AdminControllers.GetAllStore);
+router.patch('/updateStore/:id', verifyToken, checkAdmin, AdminControllers.UpdateStore);
+router.delete('/deleteStore/:id', verifyToken, checkAdmin, AdminControllers.DeleteStore);
 module.exports = router;

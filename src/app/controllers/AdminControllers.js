@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const Account = require('../models/account');
+const Store = require('../models/storeList');
 const Products = require('../models/products');
 const formData = require('form-data');
 const Mailgun = require('mailgun.js');
@@ -229,6 +230,72 @@ class AdminControllers {
             res.status(500).json({ error: 'Delete product error' });
         }
     }
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//store
+    CreateStore(req, res){
+        try{
+            const formData = req.body;
+            const store = new Store(formData);
+            store.save((err, store) => {
+                if (err) {
+                    console.log(err);
+                    res.status(500).json({ error: 'Create store error' });
+                }
+                console.log('tao cua hang moi thanh cong');
+                res.status(201).json(mongooseToObject(store));
+            });
+        }
+        catch(err){
+            console.log(err);
+            res.status(500).json({ error: 'Create store error' });
+        }
+    }
+    async GetAllStore(req, res){
+        try{
+            const stores = await Store.find({});
+            if(stores) res.status(200).json(mulMgToObject(stores));
+        }
+        catch(err){
+            console.log(err);
+            res.status(500).json({ error: 'Get all store error' });
+        }
+    }
+    UpdateStore(req, res){
+        try{
+            const id = req.params.id;
+            const formData = req.body;
+            Store.findByIdAndUpdate(id, formData, {new: true}, (err, store) => {
+                if (err) {
+                    console.log(err);
+                    res.status(500).json({ error: 'Update store error' });
+                }
+                console.log('cap nhat thong tin cua hang thanh cong');
+                res.status(200).json(mongooseToObject(store));
+            });
+        }
+        catch(err){
+            console.log(err);
+            res.status(500).json({ error: 'Update store error' });
+        }
+    }
+    DeleteStore(req, res){
+        try{
+            const id = req.params.id;
+            Store.findByIdAndDelete(id, (err, store) => {
+                if (err) {
+                    console.log(err);
+                    res.status(500).json({ error: 'Delete store error' });
+                }
+                console.log('xoa cua hang thanh cong');
+                res.status(200).json(mongooseToObject(store));
+            });
+        }
+        catch(err){
+            console.log(err);
+            res.status(500).json({ error: 'Delete store error' });
+        }
+    }
+
 }
 
 

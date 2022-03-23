@@ -7,4 +7,5 @@ router.get('/vnpay_ipn', OrderControllers.VnpayIpn);
 router.post('/createOrder', OrderControllers.CreateOrder);
 // order
 router.get('/getAllOrder', OrderControllers.GetAllOrder);
+router.get('/getOrderById/:id', OrderControllers.GetOrderById);
 module.exports = router;
