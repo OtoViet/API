@@ -91,7 +91,7 @@ class OrderControllers {
             });
     }
     GetAllOrder(req, res) {
-        Orders.find({ "contactInfo.email": "tan@gmail.com" })
+        Orders.find({ "contactInfo.email": req.user.email, isCompleted: false})
             .then(orders => {
                 res.status(200).json(mulMgToObject(orders));
             })
@@ -107,6 +107,12 @@ class OrderControllers {
             .catch(err => {
                 res.status(500).json(err);
             });
+    }
+    GetAllScheduleHistory(req, res){
+        Orders.find({isSendEmail: true,isConfirmed: true,isCompleted: true }, (err, orders) => {
+            if(err) res.status(500).json({ error: 'Get all schedule history error' });
+            res.status(200).json(mulMgToObject(orders));
+        });
     }
     CreatePaymentUrl(req, res) {
         var ipAddr = req.headers['x-forwarded-for'] ||

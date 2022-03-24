@@ -1,11 +1,9 @@
-const jwt = require('jsonwebtoken');
 const Account = require('../models/account');
 const Products = require('../models/products');
 const formData = require('form-data');
 const Mailgun = require('mailgun.js');
 const mailgun = new Mailgun(formData);
 const { mongooseToObject, mulMgToObject } = require('../../utils/mongoose');
-const bcrypt = require('bcrypt');
 require('dotenv').config();
 
 //employees
@@ -30,6 +28,24 @@ class CustomerControllers {
         Account.findOne(req.body.email, (err, account) => {
             if(err) res.status(500).json({ error: 'Get info customer error' });
             res.status(200).json(mongooseToObject(account));
+        });
+    }
+    UpdateInfoCustomer(req, res){
+        var dateFormatted = new Date(req.body.dateOfBirth).toLocaleDateString('pt-PT');
+        let dataUpdate = {
+            firstName: req.body.firstName,
+            lastName: req.body.lastName,
+            phoneNumber: req.body.phoneNumber,
+            dateOfBirth: dateFormatted
+        };
+        Account.findOneAndUpdate({ email: req.user.email }, dataUpdate, { new: true }, (err, account) => {
+            if(err) {
+                res.status(500).json({ error: 'Update info customer error' });
+                console.log(err);
+            }
+            else{
+                res.status(200).json(mongooseToObject(account));
+            }
         });
     }
    

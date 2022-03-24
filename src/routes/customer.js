@@ -9,4 +9,5 @@ router.get('/getProductById/:id', CustomerControllers.GetProductById);
 
 //customer
 router.get('/getInfoCustomer', verifyToken, CustomerControllers.GetInfoCustomer);
+router.patch('/updateInfoCustomer', verifyToken, CustomerControllers.UpdateInfoCustomer);
 module.exports = router;
