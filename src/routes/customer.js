@@ -6,7 +6,7 @@ const CustomerControllers = require('../app/controllers/CustomerControllers');
 //products
 router.get('/getAllProduct', CustomerControllers.GetAllProduct);
 router.get('/getProductById/:id', CustomerControllers.GetProductById);
-
+router.patch('/rating/:id', verifyToken, CustomerControllers.Rating);
 //customer
 router.get('/getInfoCustomer', verifyToken, CustomerControllers.GetInfoCustomer);
 router.patch('/updateInfoCustomer', verifyToken, CustomerControllers.UpdateInfoCustomer);

@@ -22,4 +22,15 @@ router.post('/createStore', verifyToken, checkAdmin, AdminControllers.CreateStor
 router.get('/getAllStore', AdminControllers.GetAllStore);
 router.patch('/updateStore/:id', verifyToken, checkAdmin, AdminControllers.UpdateStore);
 router.delete('/deleteStore/:id', verifyToken, checkAdmin, AdminControllers.DeleteStore);
+//statistical
+router.get('/statistical', verifyToken, checkAdmin, AdminControllers.Statistical);
+router.get('/statisticalLast7days', verifyToken, checkAdmin, AdminControllers.StatisticalLast7Days);
+//order
+router.get('/getAllOrder', verifyToken, checkAdmin, AdminControllers.GetAllOrder);
+//discount
+router.post('/createDiscount', verifyToken, checkAdmin, AdminControllers.CreateDiscount);
+router.get('/getAllDiscount', verifyToken, checkAdmin, AdminControllers.GetAllDiscount);
+router.patch('/updateDiscount/:id', verifyToken, checkAdmin, AdminControllers.UpdateDiscount);
+router.delete('/deleteDiscount/:id', verifyToken, checkAdmin, AdminControllers.DeleteDiscount);
+
 module.exports = router;

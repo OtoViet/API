@@ -106,12 +106,13 @@ class AuthControllers {
     }
     async LoginGoogle(req, res) {
         try {
-            let user = await Account.findOne({ email: req.body.data.yv });
+            let user = await Account.findOne({ email: req.body.data.email });
             if (!user) {
                 const account = new Account({
                     firstName: req.body.data.givenName,
                     lastName: req.body.data.familyName,
                     email: req.body.data.email,
+                    fullName: req.body.data.name,
                 });
                 account.save((err, account) => {
                     if (err) {

@@ -26,7 +26,7 @@ function sortObject(obj) {
 
 class OrderControllers {
     CreateOrder(req, res) {
-        // console.log(req.body);
+        console.log(req.body);
         let contactInfo = {
             email: req.body.email, name: req.body.name,
             phoneNumber: req.body.phoneNumber, address: req.body.address,
@@ -60,7 +60,7 @@ class OrderControllers {
         order.save()
             .then(order => {
                 res.status(200).json(mongooseToObject(order));
-                cron.schedule(`0 0 0 ${dateAppointment.getDate()} ${dateAppointment.getMonth()+1} *`, () => {
+                cron.schedule(`0 0 0 ${dateAppointment.getDate()} ${dateAppointment.getMonth() + 1} *`, () => {
                     const SECRET_KEY_EMAIL = process.env.SECRET_SEND_EMAIL;
                     //mailgun
                     const DOMAIN = process.env.DOMAIN_MAILGUN;
@@ -91,7 +91,7 @@ class OrderControllers {
             });
     }
     GetAllOrder(req, res) {
-        Orders.find({ "contactInfo.email": req.user.email, isCompleted: false})
+        Orders.find({ "contactInfo.email": req.user.email, isCompleted: false })
             .then(orders => {
                 res.status(200).json(mulMgToObject(orders));
             })
@@ -108,9 +108,9 @@ class OrderControllers {
                 res.status(500).json(err);
             });
     }
-    GetAllScheduleHistory(req, res){
-        Orders.find({isSendEmail: true,isConfirmed: true,isCompleted: true }, (err, orders) => {
-            if(err) res.status(500).json({ error: 'Get all schedule history error' });
+    GetAllScheduleHistory(req, res) {
+        Orders.find({ isSendEmail: true, isConfirmed: true, isCompleted: true }, (err, orders) => {
+            if (err) res.status(500).json({ error: 'Get all schedule history error' });
             res.status(200).json(mulMgToObject(orders));
         });
     }
@@ -119,8 +119,6 @@ class OrderControllers {
             req.connection.remoteAddress ||
             req.socket.remoteAddress ||
             req.connection.socket.remoteAddress;
-        console.log('cc');
-        console.log(req.body);
         var dateFormat = require('dateformat');
 
 
@@ -136,8 +134,6 @@ class OrderControllers {
         var orderInfo = req.body.orderDescription;
         var orderType = req.body.orderType;
         var locale = req.body.language;
-        console.log(bankCode);
-        console.log(orderInfo);
         if (locale === null || locale === '') {
             locale = 'vn';
         }
@@ -166,7 +162,7 @@ class OrderControllers {
         var signData = querystring.stringify(vnp_Params, { encode: false });
         var crypto = require("crypto");
         var hmac = crypto.createHmac("sha512", secretKey);
-        var signed = hmac.update(new Buffer(signData, 'utf-8')).digest("hex");
+        var signed = hmac.update(Buffer.from(signData, 'utf-8')).digest("hex");
         vnp_Params['vnp_SecureHash'] = signed;
         vnpUrl += '?' + querystring.stringify(vnp_Params, { encode: false });
 
@@ -174,7 +170,6 @@ class OrderControllers {
     }
     VnpayReturn(req, res) {
         var vnp_Params = req.query;
-
         var secureHash = vnp_Params['vnp_SecureHash'];
 
         delete vnp_Params['vnp_SecureHash'];
@@ -188,14 +183,13 @@ class OrderControllers {
         var signData = querystring.stringify(vnp_Params, { encode: false });
         var crypto = require("crypto");
         var hmac = crypto.createHmac("sha512", secretKey);
-        var signed = hmac.update(new Buffer(signData, 'utf-8')).digest("hex");
-
+        var signed = hmac.update(Buffer.from(signData, 'utf-8')).digest("hex");
+        console.log(vnp_Params);
         if (secureHash === signed) {
             //Kiem tra xem du lieu trong db co hop le hay khong va thong bao ket qua
-
-            res.render('success', { code: vnp_Params['vnp_ResponseCode'] })
+            res.status(200).json(vnp_Params);
         } else {
-            res.render('success', { code: '97' })
+            res.status(200).json({ code: '97' })
         }
     }
     VnpayIpn(req, res) {
@@ -208,17 +202,20 @@ class OrderControllers {
         vnp_Params = sortObject(vnp_Params);
         var secretKey = process.env.vnp_HashSecret;
         var querystring = require('qs');
+        
         var signData = querystring.stringify(vnp_Params, { encode: false });
         var crypto = require("crypto");
         var hmac = crypto.createHmac("sha512", secretKey);
-        var signed = hmac.update(new Buffer(signData, 'utf-8')).digest("hex");
-
+        var signed = hmac.update(Buffer.from(signData, 'utf-8')).digest("hex");
 
         if (secureHash === signed) {
             var orderId = vnp_Params['vnp_TxnRef'];
             var rspCode = vnp_Params['vnp_ResponseCode'];
-            //Kiem tra du lieu co hop le khong, cap nhat trang thai don hang va gui ket qua cho VNPAY theo dinh dang duoi
-            res.status(200).json({ RspCode: '00', Message: 'success' })
+            console.log("Thong tin orderId:", orderId);
+            console.log("Thong tin resCode: ", rspCode);
+            //Kiem tra du lieu co hop le khong, 
+            //cap nhat trang thai don hang va gui ket qua cho VNPAY theo dinh dang duoi
+            res.status(200).json({ RspCode: vnp_Params['vnp_ResponseCode'], Message: 'success' })
         }
         else {
             res.status(200).json({ RspCode: '97', Message: 'Fail checksum' })

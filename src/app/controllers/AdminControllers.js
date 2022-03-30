@@ -1,13 +1,14 @@
 const jwt = require('jsonwebtoken');
+const Orders = require('../models/orders');
 const Account = require('../models/account');
 const Store = require('../models/storeList');
 const Products = require('../models/products');
+const Discount = require('../models/discount');
 const formData = require('form-data');
 const Mailgun = require('mailgun.js');
 const mailgun = new Mailgun(formData);
 const { mongooseToObject, mulMgToObject } = require('../../utils/mongoose');
 const bcrypt = require('bcrypt');
-
 require('dotenv').config();
 
 const generateToken = (user) => {
@@ -34,14 +35,14 @@ const updateRefreshToken = (name, refreshToken) => {
 //employees
 class AdminControllers {
     async CreateEmployeeAccount(req, res) {
-        try{
+        try {
             var image = req.body.image;
             console.log(image);
             const saltRounds = 10;
             var role = 'employee';
             var firstName = req.body.firstName;
             var lastName = req.body.lastName;
-            var fullName= firstName + ' ' + lastName;
+            var fullName = firstName + ' ' + lastName;
             var password = req.body.password;
             var passwordHash = bcrypt.hashSync(password, saltRounds);
             password = await passwordHash;
@@ -51,7 +52,7 @@ class AdminControllers {
             var dateOfBirth = req.body.dateOfBirth;
             var dateFormatted = new Date(dateOfBirth).toLocaleDateString('pt-PT')
             console.log(dateFormatted, passwordHash);
-            var formData = { firstName, lastName, fullName, image, password, address,  email, phoneNumber, dateOfBirth: dateFormatted, roles: role };
+            var formData = { firstName, lastName, fullName, image, password, address, email, phoneNumber, dateOfBirth: dateFormatted, roles: role };
             const account = new Account(formData);
             account.save((err, account) => {
                 if (err) {
@@ -62,12 +63,12 @@ class AdminControllers {
             });
             console.log("Tao tai khoan nhan vien moi thanh cong");
         }
-        catch(err){
+        catch (err) {
             console.log(err);
             res.status(500).json({ error: 'Create employee account error' });
         }
     }
-    async login(req, res){
+    async login(req, res) {
         try {
             const { email, password } = req.body;
             const user = await Account.findOne({ email });
@@ -79,12 +80,12 @@ class AdminControllers {
             if (!isMatch) {
                 return res.status(401).json({ error: 'user or password error' });
             }
-            if(user.roles === 'admin'){
+            if (user.roles === 'admin') {
                 const token = await generateToken(email);
                 updateRefreshToken(email, token.refreshToken);
                 return res.status(200).json(token);
             }
-            else{
+            else {
                 return res.status(401).json({ error: 'user not administrator' });
             }
         }
@@ -93,21 +94,21 @@ class AdminControllers {
             return res.status(500).json({ error: "Login function error" });
         }
     }
-    async CheckAdmin(req, res){
-        res.status(200).json({ message: 'Check admin success' });
+    CheckAdmin(req, res) {
+        return res.status(200).json({ message: 'Check admin success' });
     }
-    async GetAllEmployee(req, res){
-        try{
+    async GetAllEmployee(req, res) {
+        try {
             const employees = await Account.find({ roles: 'employee' });
             res.status(200).json(mulMgToObject(employees));
         }
-        catch(err){
+        catch (err) {
             console.log(err);
             res.status(500).json({ error: 'Get all employee error' });
         }
     }
-    GetEmployee(req, res){
-        try{
+    GetEmployee(req, res) {
+        try {
             const id = req.params.id;
             Account.findById(id, (err, account) => {
                 if (err) {
@@ -118,13 +119,13 @@ class AdminControllers {
                 res.status(200).json(mongooseToObject(account));
             });
         }
-        catch(err){
+        catch (err) {
             console.log(err);
             res.status(500).json({ error: 'Get employee by id error' });
         }
     }
-    DeleteEmployee(req, res){
-        try{
+    DeleteEmployee(req, res) {
+        try {
             const id = req.params.id;
             Account.findByIdAndDelete(id, (err, account) => {
                 if (err) {
@@ -135,13 +136,13 @@ class AdminControllers {
                 res.status(200).json(mongooseToObject(account));
             });
         }
-        catch(err){
+        catch (err) {
             console.log(err);
             res.status(500).json({ error: 'Delete employee error' });
         }
     }
-    UpdateInfoEmployee(req, res){
-        try{
+    UpdateInfoEmployee(req, res) {
+        try {
             const id = req.params.id;
             const formData = req.body;
             let fullName = req.body.firstName + ' ' + req.body.lastName;
@@ -149,7 +150,7 @@ class AdminControllers {
             var dateFormatted = new Date(dateOfBirth).toLocaleDateString('pt-PT');
             formData.dateOfBirth = dateFormatted;
             formData.fullName = fullName;
-            Account.findByIdAndUpdate(id, formData, {new: true}, (err, account) => {
+            Account.findByIdAndUpdate(id, formData, { new: true }, (err, account) => {
                 if (err) {
                     console.log(err);
                     res.status(500).json({ error: 'Update info employee error' });
@@ -158,17 +159,17 @@ class AdminControllers {
                 res.status(200).json(mongooseToObject(account));
             });
         }
-        catch(err){
+        catch (err) {
             console.log(err);
             res.status(500).json({ error: 'Update info employee error' });
         }
     }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//products
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //products
 
-    AddNewProduct(req, res){
-        try{
+    AddNewProduct(req, res) {
+        try {
             const formData = req.body;
             const product = new Products(formData);
             product.save((err, product) => {
@@ -180,41 +181,43 @@ class AdminControllers {
                 res.status(201).json(mongooseToObject(product));
             });
         }
-        catch(err){
+        catch (err) {
             console.log(err);
             res.status(500).json({ error: 'Add new product error' });
         }
     }
-    async GetAllProduct(req, res){
-        try{
+    async GetAllProduct(req, res) {
+        try {
             const products = await Products.find({});
-            if(products) res.status(200).json(mulMgToObject(products));
+            if (products) res.status(200).json(mulMgToObject(products));
         }
-        catch(err){
+        catch (err) {
             console.log(err);
             res.status(500).json({ error: 'Get all product error' });
         }
     }
-    UpdateProduct(req, res){
-        try{
-            const id = req.params.id;
-            const formData = req.body;
-            Products.findByIdAndUpdate(id, formData, {new: true}, (err, product) => {
-                if (err) {
-                    console.log(err);
-                    res.status(500).json({ error: 'Update product error' });
-                }
-                console.log('cap nhat san pham thanh cong');
-                res.status(200).json(mongooseToObject(product));
-            });
+    UpdateProduct(req, res) {
+        try {
+            // const id = req.params.id;
+            let discountCode =  generateString(12);
+            console.log(discountCode);
+            // const formData = req.body;
+            // Products.findByIdAndUpdate(id, formData, { new: true }, (err, product) => {
+            //     if (err) {
+            //         console.log(err);
+            //         res.status(500).json({ error: 'Update product error' });
+            //     }
+            //     console.log('cap nhat san pham thanh cong');
+            //     res.status(200).json(mongooseToObject(product));
+            // });
         }
-        catch(err){
+        catch (err) {
             console.log(err);
             res.status(500).json({ error: 'Update product error' });
         }
     }
-    DeleteProduct(req, res){
-        try{
+    DeleteProduct(req, res) {
+        try {
             const id = req.params.id;
             Products.findByIdAndDelete(id, (err, product) => {
                 if (err) {
@@ -225,15 +228,15 @@ class AdminControllers {
                 res.status(200).json(mongooseToObject(product));
             });
         }
-        catch(err){
+        catch (err) {
             console.log(err);
             res.status(500).json({ error: 'Delete product error' });
         }
     }
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//store
-    CreateStore(req, res){
-        try{
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //store
+    CreateStore(req, res) {
+        try {
             const formData = req.body;
             const store = new Store(formData);
             store.save((err, store) => {
@@ -245,26 +248,26 @@ class AdminControllers {
                 res.status(201).json(mongooseToObject(store));
             });
         }
-        catch(err){
+        catch (err) {
             console.log(err);
             res.status(500).json({ error: 'Create store error' });
         }
     }
-    async GetAllStore(req, res){
-        try{
+    async GetAllStore(req, res) {
+        try {
             const stores = await Store.find({});
-            if(stores) res.status(200).json(mulMgToObject(stores));
+            if (stores) res.status(200).json(mulMgToObject(stores));
         }
-        catch(err){
+        catch (err) {
             console.log(err);
             res.status(500).json({ error: 'Get all store error' });
         }
     }
-    UpdateStore(req, res){
-        try{
+    UpdateStore(req, res) {
+        try {
             const id = req.params.id;
             const formData = req.body;
-            Store.findByIdAndUpdate(id, formData, {new: true}, (err, store) => {
+            Store.findByIdAndUpdate(id, formData, { new: true }, (err, store) => {
                 if (err) {
                     console.log(err);
                     res.status(500).json({ error: 'Update store error' });
@@ -273,13 +276,13 @@ class AdminControllers {
                 res.status(200).json(mongooseToObject(store));
             });
         }
-        catch(err){
+        catch (err) {
             console.log(err);
             res.status(500).json({ error: 'Update store error' });
         }
     }
-    DeleteStore(req, res){
-        try{
+    DeleteStore(req, res) {
+        try {
             const id = req.params.id;
             Store.findByIdAndDelete(id, (err, store) => {
                 if (err) {
@@ -290,12 +293,125 @@ class AdminControllers {
                 res.status(200).json(mongooseToObject(store));
             });
         }
-        catch(err){
+        catch (err) {
             console.log(err);
             res.status(500).json({ error: 'Delete store error' });
         }
     }
+    Statistical(req, res) {
+        Orders.find({ isCompleted: true })
+            .then(data => {
+                var pricesInMonth = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+                var convertMonth = { 'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, 'May': 5, 'Jun': 6, 'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12 };
+                for (var i = 0; i < data.length; i++) {
+                    var month = data[i].updatedAt.toString().split(" ")[1];
+                    pricesInMonth[convertMonth[month] - 1] += data[i].totalPrice;
+                }
+                res.json(pricesInMonth);
+            })
+            .catch(err => {
+                res.status(500).json({ error: "error when statistical" });
+            });
 
+    }
+    async StatisticalLast7Days(req, res) {
+        try {
+            let listOrder = await Orders.find({ isCompleted: true });
+            let dataSend = [0, 0, 0, 0, 0, 0, 0];
+            listOrder.forEach(element => {
+                var difference = Math.abs(new Date() - element.updatedAt);
+                var days = difference / (1000 * 3600 * 24)
+                if (days < 7) {
+                    dataSend[Math.ceil(days) - 1] += element.totalPrice;
+                }
+            });
+            res.status(200).json(dataSend);
+        }
+        catch (err) {
+            console.log(err);
+            res.status(500).json({ error: "error when statistical" });
+        }
+    }
+    GetAllOrder(req, res) {
+        Orders.find({})
+            .then(data => {
+                res.json(data);
+            })
+            .catch(err => {
+                res.status(500).json({ error: "error when get all order" });
+            });
+    }
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //discount
+    CreateDiscount(req, res) {
+        try {
+            const formData = req.body;
+            let dataSave = {};
+            dataSave.code = formData.discountCode;
+            dataSave.percentSale = formData.percentSale;
+            dataSave.endDate = formData.endDate;
+            dataSave.name = formData.name;
+            dataSave.description = formData.description;
+            const discount = new Discount(dataSave);
+            discount.save((err, discount) => {
+                if (err) {
+                    console.log(err);
+                    res.status(500).json({ error: 'Create discount error' });
+                }
+                console.log('tao giam gia moi thanh cong');
+                res.status(201).json(mongooseToObject(discount));
+            });
+        }
+        catch (err) {
+            console.log(err);
+            res.status(500).json({ error: 'Create discount error' });
+        }
+
+    }
+    GetAllDiscount(req, res) {
+        Discount.find({})
+        .then(data => {
+            res.json(data);
+        })
+        .catch(err => {
+            res.status(500).json({ error: "error when get all discount" });
+        });
+    }
+    UpdateDiscount(req, res) {
+        try {
+            const id = req.params.id;
+            const formData = req.body;
+            Discount.findByIdAndUpdate(id, formData, { new: true }, (err, discount) => {
+                if (err) {
+                    console.log(err);
+                    res.status(500).json({ error: 'Update discount error' });
+                }
+                console.log('cap nhat giam gia thanh cong');
+                res.status(200).json(mongooseToObject(discount));
+            });
+        }
+        catch (err) {
+            console.log(err);
+            res.status(500).json({ error: 'Update discount error' });
+        }
+    }
+    DeleteDiscount(req, res) {
+        try {
+            const id = req.params.id;
+            Discount.findByIdAndDelete(id, (err, discount) => {
+                if (err) {
+                    console.log(err);
+                    res.status(500).json({ error: 'Delete discount error' });
+                }
+                console.log('xoa giam gia thanh cong');
+                res.status(200).json(mongooseToObject(discount));
+            });
+        }
+        catch (err) {
+            console.log(err);
+            res.status(500).json({ error: 'Delete discount error' });
+        }
+    }
 }
 
 
