@@ -4,6 +4,7 @@ const Account = require('../models/account');
 const Store = require('../models/storeList');
 const Products = require('../models/products');
 const Discount = require('../models/discount');
+const Notification = require('../models/notify');
 const formData = require('form-data');
 const Mailgun = require('mailgun.js');
 const mailgun = new Mailgun(formData);
@@ -411,6 +412,44 @@ class AdminControllers {
             console.log(err);
             res.status(500).json({ error: 'Delete discount error' });
         }
+    }
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //notification
+    CreateNotification(req, res) {
+        try {
+            const formData = req.body;
+            console.log(formData);
+            let dataSave = {};
+            dataSave.title = formData.title;
+            dataSave.content = formData.content;
+            dataSave.type = formData.type;
+            dataSave.isRead = formData.isRead;
+            dataSave.from = formData.from;
+            const notification = new Notification(dataSave);
+            notification.save((err, notification) => {
+                if (err) {
+                    console.log(err);
+                    res.status(500).json({ error: 'Create notification error' });
+                }
+                console.log('tao thong bao moi thanh cong');
+                res.status(201).json(mongooseToObject(notification));
+            });
+        }
+        catch (err) {
+            console.log(err);
+            res.status(500).json({ error: 'Create notification error' });
+        }
+
+    }
+    GetAllNotification(req, res) {
+        Notification.find({})
+        .then(data => {
+            res.status(200).json(mulMgToObject(data));
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({ error: "error when get all notification" });
+        });
     }
 }
 

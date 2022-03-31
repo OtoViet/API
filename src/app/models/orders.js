@@ -8,7 +8,6 @@ const ordersSchema = new Schema({
     totalPrice: { type: Number, required: true },
     storeAddress: { type: Number, required: true, ref: 'storeList' },
     description: { type: String },
-    address: { type: String, required: true },
     carSize: { type: String, required: true },
     listService: [{ 
         id: {type: Number, required: true},

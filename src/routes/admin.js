@@ -32,5 +32,8 @@ router.post('/createDiscount', verifyToken, checkAdmin, AdminControllers.CreateD
 router.get('/getAllDiscount', verifyToken, checkAdmin, AdminControllers.GetAllDiscount);
 router.patch('/updateDiscount/:id', verifyToken, checkAdmin, AdminControllers.UpdateDiscount);
 router.delete('/deleteDiscount/:id', verifyToken, checkAdmin, AdminControllers.DeleteDiscount);
+//notification
+router.post('/createNotification', verifyToken, checkAdmin, AdminControllers.CreateNotification);
+router.get('/getAllNotification', verifyToken, checkAdmin, AdminControllers.GetAllNotification);
 
 module.exports = router;
