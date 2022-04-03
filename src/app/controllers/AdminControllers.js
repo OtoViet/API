@@ -199,18 +199,16 @@ class AdminControllers {
     }
     UpdateProduct(req, res) {
         try {
-            // const id = req.params.id;
-            let discountCode =  generateString(12);
-            console.log(discountCode);
-            // const formData = req.body;
-            // Products.findByIdAndUpdate(id, formData, { new: true }, (err, product) => {
-            //     if (err) {
-            //         console.log(err);
-            //         res.status(500).json({ error: 'Update product error' });
-            //     }
-            //     console.log('cap nhat san pham thanh cong');
-            //     res.status(200).json(mongooseToObject(product));
-            // });
+            const id = req.params.id;
+            const formData = req.body;
+            Products.findByIdAndUpdate(id, formData, { new: true }, (err, product) => {
+                if (err) {
+                    console.log(err);
+                    res.status(500).json({ error: 'Update product error' });
+                }
+                console.log('cap nhat san pham thanh cong');
+                res.status(200).json(mongooseToObject(product));
+            });
         }
         catch (err) {
             console.log(err);
@@ -342,6 +340,17 @@ class AdminControllers {
                 res.status(500).json({ error: "error when get all order" });
             });
     }
+    ConfirmOrder(req, res) {
+        Orders.findByIdAndUpdate(req.params.id, {
+            isConfirmed: true,
+        }, { new: true })
+            .then(order => {
+                res.status(200).json(mongooseToObject(order));
+            })
+            .catch(err => {
+                res.status(500).json(err);
+            });
+    }
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //discount
     CreateDiscount(req, res) {
@@ -418,13 +427,12 @@ class AdminControllers {
     CreateNotification(req, res) {
         try {
             const formData = req.body;
-            console.log(formData);
             let dataSave = {};
             dataSave.title = formData.title;
             dataSave.content = formData.content;
             dataSave.type = formData.type;
-            dataSave.isRead = formData.isRead;
             dataSave.from = formData.from;
+            dataSave.detail = formData.detail;
             const notification = new Notification(dataSave);
             notification.save((err, notification) => {
                 if (err) {

@@ -7,7 +7,6 @@ const ordersSchema = new Schema({
     timeAppointment : { type: String, required: true },
     totalPrice: { type: Number, required: true },
     storeAddress: { type: Number, required: true, ref: 'storeList' },
-    description: { type: String },
     carSize: { type: String, required: true },
     listService: [{ 
         id: {type: Number, required: true},

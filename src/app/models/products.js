@@ -5,7 +5,7 @@ const productsSchema = new Schema({
     productName: { type: String, required: true },
     price: { type: Number, required: true},
     priceSale: { type: Number},
-    combo: [{ comboName: String}],
+    combo: [],
     images: [{ url: String}],
     description: { type: String, default: "Không có thông tin chi tiết"},
     rating: [{ comment: String, rating:Number, user: { type: String},

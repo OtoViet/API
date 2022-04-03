@@ -27,13 +27,14 @@ router.get('/statistical', verifyToken, checkAdmin, AdminControllers.Statistical
 router.get('/statisticalLast7days', verifyToken, checkAdmin, AdminControllers.StatisticalLast7Days);
 //order
 router.get('/getAllOrder', verifyToken, checkAdmin, AdminControllers.GetAllOrder);
+router.patch('/confirmOrder/:id',verifyToken, AdminControllers.ConfirmOrder);
 //discount
 router.post('/createDiscount', verifyToken, checkAdmin, AdminControllers.CreateDiscount);
 router.get('/getAllDiscount', verifyToken, checkAdmin, AdminControllers.GetAllDiscount);
 router.patch('/updateDiscount/:id', verifyToken, checkAdmin, AdminControllers.UpdateDiscount);
 router.delete('/deleteDiscount/:id', verifyToken, checkAdmin, AdminControllers.DeleteDiscount);
 //notification
-router.post('/createNotification', verifyToken, checkAdmin, AdminControllers.CreateNotification);
+router.post('/createNotification', AdminControllers.CreateNotification);
 router.get('/getAllNotification', verifyToken, checkAdmin, AdminControllers.GetAllNotification);
 
 module.exports = router;

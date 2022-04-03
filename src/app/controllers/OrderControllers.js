@@ -1,5 +1,6 @@
 const Account = require('../models/account');
 const Products = require('../models/products');
+const Discount = require('../models/discount');
 const Orders = require('../models/orders');
 const formData = require('form-data');
 const Mailgun = require('mailgun.js');
@@ -35,16 +36,11 @@ class OrderControllers {
         let dateAppointment = new Date(req.body.time);
         let time = new Date(req.body.time);
         let timeAppointment = `${time.getHours()}:${time.getMinutes()}`;
-        let totalPrice = 0;
+        let totalPrice = req.body.totalPrice;
         let percentSale = 0;
         if (req.body.percentSale) {
             percentSale = req.body.percentSale;
         }
-        req.body.listServiceChoose.forEach(element => {
-            totalPrice += element.price;
-        });
-        totalPrice -= (totalPrice * percentSale / 100);
-        totalPrice += 50000;
         const order = new Orders({
             contactInfo,
             dateAppointment,
@@ -91,7 +87,7 @@ class OrderControllers {
             });
     }
     GetAllOrder(req, res) {
-        Orders.find({ "contactInfo.email": req.user.email, isCompleted: false })
+        Orders.find({ "contactInfo.email": req.user.email, isCompleted: false,isCanceled: false })
             .then(orders => {
                 res.status(200).json(mulMgToObject(orders));
             })
@@ -108,10 +104,41 @@ class OrderControllers {
                 res.status(500).json(err);
             });
     }
+    async CancelOrder(req, res) {
+        let orderFind = await Orders.findById(req.params.id);
+        if(orderFind.isConfirmed){
+            res.status(403).json({ error: 'Không thể hủy đơn hàng đã được xác nhận' });
+        }
+        else{
+            Orders.findByIdAndUpdate(req.params.id, { isCanceled: true }, { new: true })
+            .then(order => {
+                res.status(200).json(mongooseToObject(order));
+            })
+            .catch(err => {
+                res.status(500).json(err);
+            });
+        }
+    }
     GetAllScheduleHistory(req, res) {
-        Orders.find({ isSendEmail: true, isConfirmed: true, isCompleted: true }, (err, orders) => {
+        Orders.find({$or:[{isCompleted: true},{isCanceled:true}] }, (err, orders) => {
             if (err) res.status(500).json({ error: 'Get all schedule history error' });
             res.status(200).json(mulMgToObject(orders));
+        });
+    }
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // discount
+    GetDiscountByCode(req, res) {
+        const code = req.params.code;
+        Discount.findOne({ code: code })
+        .then(discount => {
+            if (discount) {
+                res.status(200).json({percentSale:discount.percentSale});
+            } else {
+                res.status(404).json({ error: 'Not found discount' });
+            }
+        })
+        .catch(err => {
+            res.status(500).json(err);
         });
     }
     CreatePaymentUrl(req, res) {

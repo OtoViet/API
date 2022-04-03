@@ -10,4 +10,7 @@ router.post('/createOrder', OrderControllers.CreateOrder);
 router.get('/getAllOrder',verifyToken, OrderControllers.GetAllOrder);
 router.get('/getAllScheduleHistory', verifyToken, OrderControllers.GetAllScheduleHistory);
 router.get('/getOrderById/:id',verifyToken, OrderControllers.GetOrderById);
+router.patch('/cancelOrder/:id',verifyToken, OrderControllers.CancelOrder);
+//discount
+router.get('/getDiscountByCode/:code', OrderControllers.GetDiscountByCode);
 module.exports = router;
