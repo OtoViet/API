@@ -1,5 +1,4 @@
-const Account = require('../models/account');
-const Products = require('../models/products');
+const Notification = require('../models/notify');
 const Discount = require('../models/discount');
 const Orders = require('../models/orders');
 const formData = require('form-data');
@@ -33,6 +32,7 @@ class OrderControllers {
             phoneNumber: req.body.phoneNumber, address: req.body.address,
             description: req.body.description
         };
+        if (req.body.defaultEmail) contactInfo.defaultEmail = req.body.defaultEmail;
         let dateAppointment = new Date(req.body.time);
         let time = new Date(req.body.time);
         let timeAppointment = `${time.getHours()}:${time.getMinutes()}`;
@@ -87,7 +87,7 @@ class OrderControllers {
             });
     }
     GetAllOrder(req, res) {
-        Orders.find({ "contactInfo.email": req.user.email, isCompleted: false,isCanceled: false })
+        Orders.find({ "contactInfo.defaultEmail": req.user.email, isCompleted: false, isCanceled: false })
             .then(orders => {
                 res.status(200).json(mulMgToObject(orders));
             })
@@ -95,32 +95,68 @@ class OrderControllers {
                 res.status(500).json(err);
             });
     }
-    GetOrderById(req, res) {
-        Orders.findById(req.params.id)
-            .then(order => {
-                res.status(200).json(mongooseToObject(order));
-            })
-            .catch(err => {
-                res.status(500).json(err);
+    FindOrderByEmail(req, res) {
+        Orders.find({
+            $or:
+                [
+                    { "contactInfo.email": req.params.email },
+                    { "contactInfo.defaultEmail": req.params.email },
+                ], isCompleted: false, isCanceled: false
+        })
+        .then(orders => {
+            res.status(200).json(mulMgToObject(orders));
+        })
+        .catch(err => {
+            res.status(500).json(err);
+        });
+    }
+    async GetOrderById(req, res) {
+        try {
+            let notificationType = await Notification.find({ 'detail.idOrder': req.params.id });
+            let isCanceled = false;
+            notificationType.forEach(element => {
+                if (element.type === 'orderCancel') {
+                    isCanceled = true;
+                }
             });
+            Orders.findById(req.params.id)
+                .then(order => {
+                    if (!order.isConfirmed && order.isCanceled) {
+                        isCanceled = false;
+                    }
+                    let dataSend = mongooseToObject(order);
+                    dataSend.requireCancel = isCanceled;
+                    res.status(200).json(dataSend);
+                })
+                .catch(err => {
+                    res.status(500).json(err);
+                });
+        }
+        catch (err) {
+            console.log(err);
+            res.status(500).json(err);
+        }
     }
     async CancelOrder(req, res) {
         let orderFind = await Orders.findById(req.params.id);
-        if(orderFind.isConfirmed){
+        if (orderFind.isConfirmed) {
             res.status(403).json({ error: 'Không thể hủy đơn hàng đã được xác nhận' });
         }
-        else{
+        else {
             Orders.findByIdAndUpdate(req.params.id, { isCanceled: true }, { new: true })
-            .then(order => {
-                res.status(200).json(mongooseToObject(order));
-            })
-            .catch(err => {
-                res.status(500).json(err);
-            });
+                .then(order => {
+                    res.status(200).json(mongooseToObject(order));
+                })
+                .catch(err => {
+                    res.status(500).json(err);
+                });
         }
     }
     GetAllScheduleHistory(req, res) {
-        Orders.find({$or:[{isCompleted: true},{isCanceled:true}] }, (err, orders) => {
+        Orders.find({
+            $or: [{ isCompleted: true }, { isCanceled: true }],
+            email: req.user.email
+        }, (err, orders) => {
             if (err) res.status(500).json({ error: 'Get all schedule history error' });
             res.status(200).json(mulMgToObject(orders));
         });
@@ -130,16 +166,16 @@ class OrderControllers {
     GetDiscountByCode(req, res) {
         const code = req.params.code;
         Discount.findOne({ code: code })
-        .then(discount => {
-            if (discount) {
-                res.status(200).json({percentSale:discount.percentSale});
-            } else {
-                res.status(404).json({ error: 'Not found discount' });
-            }
-        })
-        .catch(err => {
-            res.status(500).json(err);
-        });
+            .then(discount => {
+                if (discount) {
+                    res.status(200).json({ percentSale: discount.percentSale });
+                } else {
+                    res.status(404).json({ error: 'Not found discount' });
+                }
+            })
+            .catch(err => {
+                res.status(500).json(err);
+            });
     }
     CreatePaymentUrl(req, res) {
         var ipAddr = req.headers['x-forwarded-for'] ||
@@ -152,7 +188,7 @@ class OrderControllers {
         var tmnCode = process.env.vnp_TmnCode;
         var secretKey = process.env.vnp_HashSecret;
         var vnpUrl = process.env.vnp_Url;
-        var returnUrl = process.env.vnp_ReturnUrl;
+        var returnUrl = req.body.vnp_ReturnUrl ? req.body.vnp_ReturnUrl : process.env.vnp_ReturnUrl;
         var date = new Date();
         var createDate = dateFormat(date, 'yyyymmddHHmmss');
         var orderId = dateFormat(date, 'HHmmss');
@@ -192,8 +228,8 @@ class OrderControllers {
         var signed = hmac.update(Buffer.from(signData, 'utf-8')).digest("hex");
         vnp_Params['vnp_SecureHash'] = signed;
         vnpUrl += '?' + querystring.stringify(vnp_Params, { encode: false });
-
-        res.redirect(vnpUrl);
+        res.json({ vnpUrl: vnpUrl });
+        // res.redirect(vnpUrl);
     }
     VnpayReturn(req, res) {
         var vnp_Params = req.query;
@@ -229,7 +265,7 @@ class OrderControllers {
         vnp_Params = sortObject(vnp_Params);
         var secretKey = process.env.vnp_HashSecret;
         var querystring = require('qs');
-        
+
         var signData = querystring.stringify(vnp_Params, { encode: false });
         var crypto = require("crypto");
         var hmac = crypto.createHmac("sha512", secretKey);

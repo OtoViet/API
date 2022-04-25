@@ -30,7 +30,7 @@ class CustomerControllers {
             let countComment = await Orders.find({
                 "listService.idProduct": req.params.id,
                 isCommented: false,
-                "contactInfo.email": req.user.email
+                $or : [{"contactInfo.email": req.user.email}, {"contactInfo.defaultEmail": req.user.email}]
             });
             if (countComment.length > 0) {
                 let productUp = await Products.findByIdAndUpdate(req.params.id, {

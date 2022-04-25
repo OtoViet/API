@@ -27,7 +27,8 @@ router.get('/statistical', verifyToken, checkAdmin, AdminControllers.Statistical
 router.get('/statisticalLast7days', verifyToken, checkAdmin, AdminControllers.StatisticalLast7Days);
 //order
 router.get('/getAllOrder', verifyToken, checkAdmin, AdminControllers.GetAllOrder);
-router.patch('/confirmOrder/:id',verifyToken, AdminControllers.ConfirmOrder);
+router.patch('/confirmOrder/:id', verifyToken, checkAdmin, AdminControllers.ConfirmOrder);
+router.patch('/cancelOrder/:id',verifyToken,checkAdmin, AdminControllers.CancelOrder);
 //discount
 router.post('/createDiscount', verifyToken, checkAdmin, AdminControllers.CreateDiscount);
 router.get('/getAllDiscount', verifyToken, checkAdmin, AdminControllers.GetAllDiscount);
@@ -36,5 +37,6 @@ router.delete('/deleteDiscount/:id', verifyToken, checkAdmin, AdminControllers.D
 //notification
 router.post('/createNotification', AdminControllers.CreateNotification);
 router.get('/getAllNotification', verifyToken, checkAdmin, AdminControllers.GetAllNotification);
+router.get('/getNotificationByOrderId/:idOrder', verifyToken, checkAdmin, AdminControllers.GetNotificationByOrderId);
 
 module.exports = router;

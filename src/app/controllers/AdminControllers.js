@@ -334,7 +334,7 @@ class AdminControllers {
     GetAllOrder(req, res) {
         Orders.find({})
             .then(data => {
-                res.json(data);
+                res.json(mulMgToObject(data));
             })
             .catch(err => {
                 res.status(500).json({ error: "error when get all order" });
@@ -343,6 +343,18 @@ class AdminControllers {
     ConfirmOrder(req, res) {
         Orders.findByIdAndUpdate(req.params.id, {
             isConfirmed: true,
+        }, { new: true })
+            .then(order => {
+                res.status(200).json(mongooseToObject(order));
+            })
+            .catch(err => {
+                res.status(500).json(err);
+            });
+    }
+    CancelOrder(req, res) {
+        Orders.findByIdAndUpdate(req.params.id, {
+            isCanceled: true,
+            isConfirmed: false,
         }, { new: true })
             .then(order => {
                 res.status(200).json(mongooseToObject(order));
@@ -428,6 +440,7 @@ class AdminControllers {
         try {
             const formData = req.body;
             let dataSave = {};
+            dataSave.expoPushToken = formData.expoPushToken;
             dataSave.title = formData.title;
             dataSave.content = formData.content;
             dataSave.type = formData.type;
@@ -457,6 +470,16 @@ class AdminControllers {
         .catch(err => {
             console.log(err);
             res.status(500).json({ error: "error when get all notification" });
+        });
+    }
+    GetNotificationByOrderId(req, res) {
+        Notification.findOne({ 'detail.idOrder': req.params.idOrder })
+        .then(data => {
+            res.status(200).json(mongooseToObject(data));
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({ error: "error when get notification by idOrder" });
         });
     }
 }

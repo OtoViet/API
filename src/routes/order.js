@@ -8,6 +8,7 @@ router.get('/vnpay_ipn', OrderControllers.VnpayIpn);
 // order
 router.post('/createOrder', OrderControllers.CreateOrder);
 router.get('/getAllOrder',verifyToken, OrderControllers.GetAllOrder);
+router.get('/findOrderByEmail/:email', OrderControllers.FindOrderByEmail);
 router.get('/getAllScheduleHistory', verifyToken, OrderControllers.GetAllScheduleHistory);
 router.get('/getOrderById/:id',verifyToken, OrderControllers.GetOrderById);
 router.patch('/cancelOrder/:id',verifyToken, OrderControllers.CancelOrder);

@@ -5,6 +5,7 @@ const notifySchema = new Schema({
     title: {type: String, required: true},
     content: {type: String, required: true},
     type: {type: String, required: true},
+    expoPushToken: {type: String},
     from: {type: String, required: true},
     isRead: {type: Boolean, default: false},
     detail: {type: Object},
