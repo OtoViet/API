@@ -64,7 +64,10 @@ class CustomerControllers {
         }
     }
     GetInfoCustomer(req, res) {
-        Account.findOne(req.body.email, (err, account) => {
+
+        // console.log('thong tin tai khoan google');
+        console.log(req.body);
+        Account.findOne({email: req.user.email}, (err, account) => {
             if (err) res.status(500).json({ error: 'Get info customer error' });
             res.status(200).json(mongooseToObject(account));
         });
@@ -74,6 +77,7 @@ class CustomerControllers {
         let dataUpdate = {
             firstName: req.body.firstName,
             lastName: req.body.lastName,
+            fullName: req.body.lastName + ' ' + req.body.firstName,
             phoneNumber: req.body.phoneNumber,
             dateOfBirth: dateFormatted
         };

@@ -14,6 +14,8 @@ const ordersSchema = new Schema({
         productName:{type: String, required: true},
         price: {type: Number, required: true}, 
     }],
+    combo: { type: String },
+    priceCombo: { type: Number },
     percentSale: { type: Number},
     isPaid: {type: Boolean, default: false},
     isCommented: {type: Boolean, default: false},
@@ -21,7 +23,8 @@ const ordersSchema = new Schema({
     isCompleted: {type: Boolean, default: false},
     isSendEmail: {type: Boolean, default: false},
     isDeleted: {type: Boolean, default: false},
-    isConfirmed: {type: Boolean, default: false}
+    isConfirmed: {type: Boolean, default: false},
+    employeeInfo: { type: Object },
 }, {
     collection: 'orders',
     timestamps: true,

@@ -1,5 +1,6 @@
 const Notification = require('../models/notify');
 const Discount = require('../models/discount');
+const Account = require('../models/account');
 const Orders = require('../models/orders');
 const formData = require('form-data');
 const Mailgun = require('mailgun.js');
@@ -52,6 +53,8 @@ class OrderControllers {
             carSize: req.body.carSize,
             totalPrice,
             percentSale,
+            combo: req.body.combo,
+            priceCombo: req.body.priceCombo,
         });
         order.save()
             .then(order => {
@@ -87,7 +90,11 @@ class OrderControllers {
             });
     }
     GetAllOrder(req, res) {
-        Orders.find({ "contactInfo.defaultEmail": req.user.email, isCompleted: false, isCanceled: false })
+        Orders.find({
+            $or: [{ "contactInfo.defaultEmail": req.user.email },
+            { "contactInfo.email": req.user.email },
+            ], isCompleted: false, isCanceled: false
+        })
             .then(orders => {
                 res.status(200).json(mulMgToObject(orders));
             })
@@ -103,12 +110,12 @@ class OrderControllers {
                     { "contactInfo.defaultEmail": req.params.email },
                 ], isCompleted: false, isCanceled: false
         })
-        .then(orders => {
-            res.status(200).json(mulMgToObject(orders));
-        })
-        .catch(err => {
-            res.status(500).json(err);
-        });
+            .then(orders => {
+                res.status(200).json(mulMgToObject(orders));
+            })
+            .catch(err => {
+                res.status(500).json(err);
+            });
     }
     async GetOrderById(req, res) {
         try {
@@ -152,11 +159,48 @@ class OrderControllers {
                 });
         }
     }
+    UpdatePayStatuslOrder(req, res) {
+        Orders.findByIdAndUpdate(req.params.id, { isPaid: true }, { new: true })
+        .then(order => {
+            res.status(200).json(mongooseToObject(order));
+        })
+        .catch(err => {
+            res.status(500).json(err);
+        });
+    }
+    GetAllOrderForEmployee(req, res) {
+        console.log('hien thi thong tin ', req.user.email);
+        Account.findOne({ email: req.user.email }).then(account => {
+            if(account.roles=='employee'){
+                Orders.find({"employeeInfo.email": req.user.email}).then(order => {
+                    res.status(200).json(mulMgToObject(order));
+                })
+                .catch(err => {
+                    res.status(500).json(err);
+                });
+            }
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json(err);
+        });
+    }
     GetAllScheduleHistory(req, res) {
+        // console.log('thong tin order cua',req.user.email);
         Orders.find({
-            $or: [{ isCompleted: true }, { isCanceled: true }],
-            email: req.user.email
+            $or: [{ 
+                $or: [
+                    { "contactInfo.defaultEmail": req.user.email },
+                    { "contactInfo.email": req.user.email },
+                ],
+                isCompleted: true }, { 
+                    $or: [
+                        { "contactInfo.defaultEmail": req.user.email },
+                        { "contactInfo.email": req.user.email },
+                    ],
+                    isCanceled: true }]
         }, (err, orders) => {
+            console.log(orders);
             if (err) res.status(500).json({ error: 'Get all schedule history error' });
             res.status(200).json(mulMgToObject(orders));
         });

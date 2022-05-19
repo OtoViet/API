@@ -15,6 +15,7 @@ router.patch('/updateInfoEmployee/:id', verifyToken, checkAdmin, AdminController
 //products
 router.post('/addNewProduct', verifyToken, checkAdmin, AdminControllers.AddNewProduct);
 router.get('/getAllProduct', verifyToken, checkAdmin, AdminControllers.GetAllProduct);
+router.get('/getProductById/:id', verifyToken, checkAdmin, AdminControllers.GetProductById);
 router.patch('/updateProduct/:id', verifyToken, checkAdmin, AdminControllers.UpdateProduct);
 router.delete('/deleteProduct/:id', verifyToken, checkAdmin, AdminControllers.DeleteProduct);
 //stores
@@ -29,6 +30,8 @@ router.get('/statisticalLast7days', verifyToken, checkAdmin, AdminControllers.St
 router.get('/getAllOrder', verifyToken, checkAdmin, AdminControllers.GetAllOrder);
 router.patch('/confirmOrder/:id', verifyToken, checkAdmin, AdminControllers.ConfirmOrder);
 router.patch('/cancelOrder/:id',verifyToken,checkAdmin, AdminControllers.CancelOrder);
+router.patch('/updateOrder/:id',verifyToken,checkAdmin, AdminControllers.UpdateOrder);
+router.patch('/setEmployeeForOrder/:id',verifyToken,checkAdmin, AdminControllers.SetEmployee);
 //discount
 router.post('/createDiscount', verifyToken, checkAdmin, AdminControllers.CreateDiscount);
 router.get('/getAllDiscount', verifyToken, checkAdmin, AdminControllers.GetAllDiscount);

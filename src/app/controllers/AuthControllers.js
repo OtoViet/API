@@ -106,13 +106,14 @@ class AuthControllers {
     }
     async LoginGoogle(req, res) {
         try {
+            console.log(req.body);
             let user = await Account.findOne({ email: req.body.data.email });
             if (!user) {
                 const account = new Account({
-                    firstName: req.body.data.givenName,
-                    lastName: req.body.data.familyName,
+                    firstName: req.body.data.firstName,
+                    lastName: req.body.data.lastName,
                     email: req.body.data.email,
-                    fullName: req.body.data.name,
+                    fullName: req.body.data.fullName,
                 });
                 account.save((err, account) => {
                     if (err) {
@@ -163,11 +164,11 @@ class AuthControllers {
         try{
             const user = await Account.findOne({ email: req.user.email });
             updateRefreshToken(user.email, null);
-            return res.sendStatus(204);
+            return res.status(204).json({error: null});
         }
         catch (err) {
             console.log('co loi xay ra khi logout');
-            return res.sendStatus(500);
+            return res.status(500).json({error: 'co loi xay ra khi logout'});
         }
     }
     ForgotPassword(req, res) {

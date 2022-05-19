@@ -197,6 +197,12 @@ class AdminControllers {
             res.status(500).json({ error: 'Get all product error' });
         }
     }
+    GetProductById(req, res) {
+        Products.findById(req.params.id, (err, product) => {
+            if (err) res.status(404).json({ error: 'Not found product by id' });
+            res.status(200).json(mongooseToObject(product));
+        }).populate("infoUserComment","fullName phoneNumber").exec();
+    }
     UpdateProduct(req, res) {
         try {
             const id = req.params.id;
@@ -363,6 +369,28 @@ class AdminControllers {
                 res.status(500).json(err);
             });
     }
+    UpdateOrder(req, res) {
+        let data = req.body;
+        Orders.findByIdAndUpdate(req.params.id, data, { new: true })
+        .then(order => {
+            res.status(200).json(mongooseToObject(order));
+        })
+        .catch(err => {
+            res.status(500).json(err);
+        });
+    }
+    SetEmployee(req, res){
+        // console.log(req.body);
+        Orders.findByIdAndUpdate(req.params.id, {
+            employeeInfo: req.body,
+        }, { new: true })
+        .then(order => {
+            res.status(200).json(mongooseToObject(order));
+        })
+        .catch(err => {
+            res.status(500).json(err);
+        });
+    }
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //discount
     CreateDiscount(req, res) {
@@ -403,6 +431,7 @@ class AdminControllers {
         try {
             const id = req.params.id;
             const formData = req.body;
+            formData.code = formData.discountCode;
             Discount.findByIdAndUpdate(id, formData, { new: true }, (err, discount) => {
                 if (err) {
                     console.log(err);

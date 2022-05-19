@@ -12,6 +12,8 @@ router.get('/findOrderByEmail/:email', OrderControllers.FindOrderByEmail);
 router.get('/getAllScheduleHistory', verifyToken, OrderControllers.GetAllScheduleHistory);
 router.get('/getOrderById/:id',verifyToken, OrderControllers.GetOrderById);
 router.patch('/cancelOrder/:id',verifyToken, OrderControllers.CancelOrder);
+router.patch('/updatePayStatuslOrder/:id',verifyToken, OrderControllers.UpdatePayStatuslOrder);
+router.get('/getAllOrderForEmployee',verifyToken, OrderControllers.GetAllOrderForEmployee);
 //discount
 router.get('/getDiscountByCode/:code', OrderControllers.GetDiscountByCode);
 module.exports = router;
