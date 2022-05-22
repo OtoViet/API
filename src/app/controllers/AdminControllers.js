@@ -493,6 +493,7 @@ class AdminControllers {
     }
     GetAllNotification(req, res) {
         Notification.find({})
+        .sort({ createdAt: -1 })
         .then(data => {
             res.status(200).json(mulMgToObject(data));
         })
