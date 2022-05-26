@@ -67,7 +67,7 @@ class OrderControllers {
                     const mg = mailgun.client({ username: 'api', key: api_key });
                     const data = {
                         from: 'OtoViet <admin@otoviet.tech>',
-                        to: ["nguyennhattan.work@gmail.com"],
+                        to: [req.body.email],
                         subject: "Thông báo lịch hẹn",
                         html: `<p>Chào ${req.body.name},</p>
                         <p>Bạn đã đặt lịch hẹn thành công. Vui lòng kiểm tra lịch hẹn của bạn tại địa chỉ: <a href="http://localhost:3000/appointmentSchedule/${orderRes._id}">Này</a></p>
