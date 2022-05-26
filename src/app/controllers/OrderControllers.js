@@ -27,7 +27,7 @@ function sortObject(obj) {
 
 class OrderControllers {
     CreateOrder(req, res) {
-        console.log(req.body);
+        // console.log(req.body.listServiceChoose);
         let contactInfo = {
             email: req.body.email, name: req.body.name,
             phoneNumber: req.body.phoneNumber, address: req.body.address,
@@ -57,9 +57,9 @@ class OrderControllers {
             priceCombo: req.body.priceCombo,
         });
         order.save()
-            .then(order => {
-                res.status(200).json(mongooseToObject(order));
-                cron.schedule(`0 0 0 ${dateAppointment.getDate()} ${dateAppointment.getMonth() + 1} *`, () => {
+            .then(orderRes => {
+                res.status(200).json(mongooseToObject(orderRes));
+                cron.schedule(`0 ${dateAppointment.getMinutes()} ${dateAppointment.getHours()} ${dateAppointment.getDate()-1} ${dateAppointment.getMonth() + 1} *`, () => {
                     const SECRET_KEY_EMAIL = process.env.SECRET_SEND_EMAIL;
                     //mailgun
                     const DOMAIN = process.env.DOMAIN_MAILGUN;
@@ -67,17 +67,26 @@ class OrderControllers {
                     const mg = mailgun.client({ username: 'api', key: api_key });
                     const data = {
                         from: 'OtoViet <admin@otoviet.tech>',
-                        to: ["nguyennhattan1562000@gmail.com"],
+                        to: ["nguyennhattan.work@gmail.com"],
                         subject: "Thông báo lịch hẹn",
                         html: `<p>Chào ${req.body.name},</p>
-                        <p>Bạn đã đặt lịch hẹn thành công. Vui lòng kiểm tra lịch hẹn của bạn tại địa chỉ: <a href="http://localhost:3000/appointmentSchedule/${order._id}">Này</a></p>
+                        <p>Bạn đã đặt lịch hẹn thành công. Vui lòng kiểm tra lịch hẹn của bạn tại địa chỉ: <a href="http://localhost:3000/appointmentSchedule/${orderRes._id}">Này</a></p>
                         <p>Nếu bạn không phải là người đặt lịch hẹn, vui lòng bỏ qua email này.</p>
                         <p>Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi.</p>
                         <p>Trân trọng,</p>
                         <p>OtoViet</p>`
                     };
                     mg.messages.create(DOMAIN, data)
-                        .then(msg => console.log(msg)) // logs response data
+                        .then(msg => {
+                            console.log(msg);
+                            Orders.findByIdAndUpdate(orderRes._id,{isSendEmail: true})
+                            .then((dt)=>{
+                                console.log=(dt);
+                            })
+                            .catch(e=>{
+                                console.log(e);
+                            })
+                        }) // logs response data
                         .catch(err => console.log(err)); // logs any error
                 }, {
                     scheduled: true,
